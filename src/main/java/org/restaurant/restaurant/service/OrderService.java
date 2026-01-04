@@ -47,19 +47,33 @@ public class OrderService implements IOrderService{
     @Override
     public OrderResponse getOrder(Long id) throws DataNotFoundException {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("Can't find user with id = " + id));
+                .orElseThrow(() -> new DataNotFoundException("Can't find order with id = " + id));
         modelMapper.typeMap(Order.class, OrderResponse.class);
         return modelMapper.map(order, OrderResponse.class);
     }
 
     @Override
-    public OrderResponse updateOrder(Long id, OrderDTO orderDTO) {
-        return null;
+    public OrderResponse updateOrder(Long id, OrderDTO orderDTO) throws DataNotFoundException {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Can't find order with id = " + id));
+        User user = userRepository.findById(orderDTO.getUserId())
+                .orElseThrow(() -> new DataNotFoundException("Can't find user with id = " + orderDTO.getUserId()));
+        modelMapper.typeMap(OrderDTO.class, Order.class)
+                .addMappings(mapper -> mapper.skip(Order::setId));
+        modelMapper.map(orderDTO, order);
+        order.setUser(user);
+        orderRepository.save(order);
+        modelMapper.typeMap(Order.class, OrderResponse.class);
+        return modelMapper.map(order, OrderResponse.class);
     }
 
     @Override
     public void deleteOrder(Long id) {
-
+        Order order = orderRepository.findById(id).orElse(null);
+        if (order != null) {
+            order.setActive(false);
+            orderRepository.save(order);
+        }
     }
 
     @Override
