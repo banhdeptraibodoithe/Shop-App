@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.restaurant.restaurant.dtos.users.LoginDTO;
 import org.restaurant.restaurant.dtos.users.RegisterDTO;
+import org.restaurant.restaurant.models.User;
 import org.restaurant.restaurant.service.IUserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -31,8 +32,8 @@ public class UserController {
             if (!registerDTO.getPassword().equals(registerDTO.getReTypePassword())) {
                 return ResponseEntity.badRequest().body("Password does not match!");
             }
-            userService.register(registerDTO);
-            return ResponseEntity.ok("Register user successfully");
+            User user = userService.register(registerDTO);
+            return ResponseEntity.ok(user);
         } catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -45,10 +46,10 @@ public class UserController {
                         .stream().map(FieldError::getDefaultMessage).toList();
                 return ResponseEntity.badRequest().body(errorMessages);
             }
-            return ResponseEntity.ok("Login user successfully and token is...");
+            String token = userService.login(loginDTO);
+            return ResponseEntity.ok(token);
         } catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
     }
 }

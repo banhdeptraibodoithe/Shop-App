@@ -7,5 +7,5 @@ import org.restaurant.restaurant.models.User;
 
 public interface IUserService {
     User register(RegisterDTO registerDTO) throws DataNotFoundException;
-    String login(LoginDTO loginDTO);
+    String login(LoginDTO loginDTO) throws DataNotFoundException;
 }
