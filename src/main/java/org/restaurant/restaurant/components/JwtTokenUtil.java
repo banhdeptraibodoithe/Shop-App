@@ -9,6 +9,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.restaurant.restaurant.models.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -54,7 +55,7 @@ public class JwtTokenUtil {
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey()).build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
     }
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -67,5 +68,9 @@ public class JwtTokenUtil {
     }
     public String extractPhoneNumber(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+    public boolean validateToken(String token, UserDetails userDetails) {
+        String phoneNumber = extractPhoneNumber(token);
+        return (phoneNumber.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 }
